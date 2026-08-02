@@ -4,10 +4,7 @@ TARBALL = $(NAME)-$(VERSION).tar.gz
 SRCDIR = $(shell cd .. && pwd)
 
 srpm:
-	# Vendor dependencies (requires networking enabled in COPR)
-	cd $(SRCDIR) && go mod vendor
-
-	# Create source tarball
+	# Create source tarball (vendor/ already committed in repo)
 	cd $(SRCDIR) && \
 	mkdir -p $(NAME)-$(VERSION) && \
 	cp -a cmd internal main.go go.mod go.sum vendor testdata quadlet-compose.spec LICENSE Makefile .gitignore $(NAME)-$(VERSION)/ && \
