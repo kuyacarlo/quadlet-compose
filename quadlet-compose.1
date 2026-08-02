@@ -1,0 +1,126 @@
+.TH QUADLET-COMPOSE 1 "August 2026" "quadlet-compose 0.1.1" "User Commands"
+.SH NAME
+quadlet-compose \- generate and manage systemd units from Podman Compose files
+.SH SYNOPSIS
+.B quadlet-compose
+[\fIOPTIONS\fR] \fICOMMAND\fR [\fIARGS\fR]
+.PP
+.B complet
+[\fIOPTIONS\fR] \fICOMMAND\fR [\fIARGS\fR]
+.SH DESCRIPTION
+.B quadlet-compose
+(also available as
+.BR complet )
+converts Docker Compose files into systemd units managed by Podman.
+It handles generation, installation, enable/disable, and lifecycle operations
+for rootless or system-wide containers.
+.SH OPTIONS
+.TP
+.B \-\-help, \-h
+Show help for any command.
+.TP
+.B \-\-version
+Print version information.
+.TP
+.B \-\-user
+Operate in user mode (systemctl --user). This is the default.
+.TP
+.B \-\-system
+Operate in system mode (systemctl --system).
+.SH COMMANDS
+.SS gen <compose-file>
+Generate a systemd unit from a compose file and print to stdout (dry-run mode).
+.PP
+Flags:
+.RS
+.TP
+.B \-\-name \fINAME\fR
+Override service name (default: compose project name).
+.TP
+.B \-\-after \fIUNIT\fR
+Additional After= dependencies (repeatable).
+.TP
+.B \-\-env-file \fIPATH\fR
+EnvironmentFile= paths (repeatable).
+.TP
+.B \-\-timeout \fISECONDS\fR
+TimeoutStartSec value (default: 120).
+.TP
+.B \-\-compose-bin \fICOMMAND\fR
+Compose binary command (default: /usr/bin/podman compose).
+.RE
+.SS install <compose-file>
+Generate and install a systemd unit, then daemon-reload.
+Accepts the same flags as
+.BR gen .
+.SS enable <compose-file>
+Install, enable, and start the systemd unit. Accepts the same flags as
+.BR gen .
+.SS disable <name>
+Disable and stop a managed unit.
+.SS remove <name>
+Disable, delete the unit file, and daemon-reload.
+.SS list
+List all managed units with their source and status.
+.SS status <name>
+Show systemctl status for a managed unit.
+.SS logs <name> [\-\- extra-flags]
+Show journalctl logs for a managed unit. Extra flags after
+.B \-\-
+are passed to journalctl.
+.SS completions <shell>
+Generate shell completion scripts. Supported shells: bash, zsh, fish.
+.SH FILES
+.TP
+.I ~/.config/containers/systemd/
+User-mode unit directory where generated units are installed.
+.TP
+.I /etc/containers/systemd/
+System-mode unit directory.
+.TP
+.I ~/.config/containers/compose/
+Default compose file directory for
+.BR complet-generator (1).
+.SH EXAMPLES
+.PP
+Preview a unit without installing:
+.RS
+.nf
+quadlet-compose gen docker-compose.yml
+.fi
+.RE
+.PP
+Install and enable a stack:
+.RS
+.nf
+complet enable ./my-app/docker-compose.yml
+.fi
+.RE
+.PP
+List managed units:
+.RS
+.nf
+complet list
+.fi
+.RE
+.PP
+View logs:
+.RS
+.nf
+complet logs my-app -- -f --since "5 min ago"
+.fi
+.RE
+.PP
+Remove a managed unit:
+.RS
+.nf
+complet remove my-app
+.fi
+.RE
+.SH SEE ALSO
+.BR complet-generator (1),
+.BR podman-compose (1),
+.BR systemctl (1),
+.BR journalctl (1)
+.SH AUTHORS
+kuyacarlo <kuyacarlo@users.noreply.github.com>
