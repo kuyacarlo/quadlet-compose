@@ -1,0 +1,23 @@
+# Managed by quadlet-compose
+# Source: /srv/pihole/docker-compose.yml
+# Generated: 2026-08-01T12:00:00Z
+
+[Unit]
+Description=quadlet-compose: pihole
+After=network-online.target
+Requires=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/srv/pihole
+ExecStartPre=/bin/sh -c '/usr/bin/podman network exists proxy || /usr/bin/podman network create proxy'
+ExecStartPre=/bin/sh -c '/usr/bin/podman network exists dns || /usr/bin/podman network create dns'
+ExecStart=/usr/bin/podman compose -f docker-compose.yml up -d
+ExecStop=/usr/bin/podman compose -f docker-compose.yml down
+ExecReload=/usr/bin/podman compose -f docker-compose.yml up -d --force-recreate
+Restart=on-failure
+TimeoutStartSec=120
+
+[Install]
+WantedBy=default.target

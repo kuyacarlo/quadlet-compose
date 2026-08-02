@@ -1,0 +1,54 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Run tests
+        run: go test ./...
+
+      - name: Extract version
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+
+      - name: Update spec version
+        run: |
+          sed -i "s/^Version:.*/Version: ${{ steps.version.outputs.version }}/" quadlet-compose.spec
+          sed -i "s/^Release:.*/Release: 1%{?dist}/" quadlet-compose.spec
+
+      - name: Build binaries
+        run: |
+          LDFLAGS="-X main.version=${{ steps.version.outputs.version }}"
+          GOOS=linux GOARCH=amd64 go build -ldflags "$LDFLAGS" -o dist/quadlet-compose-linux-amd64 .
+          GOOS=linux GOARCH=arm64 go build -ldflags "$LDFLAGS" -o dist/quadlet-compose-linux-arm64 .
+
+      - name: Generate completions
+        run: |
+          chmod +x dist/quadlet-compose-linux-amd64
+          ./dist/quadlet-compose-linux-amd64 completions bash > dist/quadlet-compose.bash
+          ./dist/quadlet-compose-linux-amd64 completions zsh > dist/_quadlet-compose
+          ./dist/quadlet-compose-linux-amd64 completions fish > dist/quadlet-compose.fish
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            dist/quadlet-compose-linux-amd64
+            dist/quadlet-compose-linux-arm64
+            dist/quadlet-compose.bash
+            dist/_quadlet-compose
+            dist/quadlet-compose.fish

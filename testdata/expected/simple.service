@@ -1,0 +1,21 @@
+# Managed by quadlet-compose
+# Source: /srv/myapp/docker-compose.yml
+# Generated: 2026-08-01T12:00:00Z
+
+[Unit]
+Description=quadlet-compose: myapp
+After=network-online.target
+Requires=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/srv/myapp
+ExecStart=/usr/bin/podman compose -f docker-compose.yml up -d
+ExecStop=/usr/bin/podman compose -f docker-compose.yml down
+ExecReload=/usr/bin/podman compose -f docker-compose.yml up -d --force-recreate
+Restart=on-failure
+TimeoutStartSec=120
+
+[Install]
+WantedBy=default.target
