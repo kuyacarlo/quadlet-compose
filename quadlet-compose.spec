@@ -1,5 +1,5 @@
 Name:           quadlet-compose
-Version:        0.1.1
+Version:        0.2.0
 Release:        1%{?dist}
 Summary:        Generate and manage systemd units from Podman Compose files
 License:        MIT
@@ -55,6 +55,9 @@ go test ./...
 %{_datadir}/fish/vendor_completions.d/quadlet-compose.fish
 
 %changelog
+* Sun Aug 02 2026 kuyacarlo <kuyacarlo@users.noreply.github.com> - 0.2.0-1
+- Add --in-pod flag for gen/install/enable commands
+
 * Sun Aug 02 2026 kuyacarlo <kuyacarlo@users.noreply.github.com> - 0.1.1-1
 - Add man page
 - Fix changelog date

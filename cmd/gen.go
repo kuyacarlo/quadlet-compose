@@ -41,6 +41,7 @@ func addGenFlags(cmd *cobra.Command) {
 	cmd.Flags().StringSlice("env-file", nil, "EnvironmentFile= paths (repeatable)")
 	cmd.Flags().Int("timeout", 120, "TimeoutStartSec value in seconds")
 	cmd.Flags().String("compose-bin", "/usr/bin/podman compose", "compose binary command")
+	cmd.Flags().String("in-pod", "", "run containers in a pod (pod name, or 'true' to use project name)")
 }
 
 // buildOpts parses the compose file and constructs unit.Opts from flags.
@@ -59,6 +60,12 @@ func buildOpts(cmd *cobra.Command, composePath string) (unit.Opts, error) {
 	envFiles, _ := cmd.Flags().GetStringSlice("env-file")
 	timeout, _ := cmd.Flags().GetInt("timeout")
 	composeBin, _ := cmd.Flags().GetString("compose-bin")
+	inPod, _ := cmd.Flags().GetString("in-pod")
+
+	// If --in-pod=true, use the project name as the pod name.
+	if inPod == "true" {
+		inPod = name
+	}
 
 	return unit.Opts{
 		Name:             name,
@@ -70,6 +77,7 @@ func buildOpts(cmd *cobra.Command, composePath string) (unit.Opts, error) {
 		EnvFiles:         envFiles,
 		Timeout:          timeout,
 		ComposeBin:       composeBin,
+		InPod:            inPod,
 		GeneratedAt:      time.Now(),
 	}, nil
 }

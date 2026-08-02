@@ -18,6 +18,7 @@ type Opts struct {
 	EnvFiles         []string
 	Timeout          int
 	ComposeBin       string
+	InPod            string // pod name for --in-pod; empty means no pod
 	GeneratedAt      time.Time
 }
 
@@ -51,6 +52,7 @@ type templateData struct {
 	EnvFiles         []string
 	ComposeBin       string
 	ComposeFilename  string
+	InPod            string
 	Timeout          int
 }
 
@@ -73,9 +75,9 @@ ExecStartPre=/bin/sh -c '{{$.PodmanBin}} network exists {{.}} || {{$.PodmanBin}}
 {{- range .EnvFiles}}
 EnvironmentFile={{.}}
 {{- end}}
-ExecStart={{.ComposeBin}} -f {{.ComposeFilename}} up -d
+ExecStart={{.ComposeBin}}{{if .InPod}} --in-pod={{.InPod}}{{end}} -f {{.ComposeFilename}} up -d
 ExecStop={{.ComposeBin}} -f {{.ComposeFilename}} down
-ExecReload={{.ComposeBin}} -f {{.ComposeFilename}} up -d --force-recreate
+ExecReload={{.ComposeBin}}{{if .InPod}} --in-pod={{.InPod}}{{end}} -f {{.ComposeFilename}} up -d --force-recreate
 Restart=on-failure
 TimeoutStartSec={{.Timeout}}
 
@@ -126,6 +128,7 @@ func Generate(opts Opts) string {
 		EnvFiles:         opts.EnvFiles,
 		ComposeBin:       composeBin,
 		ComposeFilename:  opts.ComposeFilename,
+		InPod:            opts.InPod,
 		Timeout:          timeout,
 	}
 
