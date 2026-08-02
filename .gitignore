@@ -2,4 +2,4 @@ quadlet-compose
 complet
 *.tar.gz
 completions/
-vendor/
+
